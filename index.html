@@ -765,31 +765,23 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
 })();
 </script>
 
-<button type="button" class="songpill" id="audio-toggle" aria-pressed="false" hidden>❚❚ sound</button>
+<button type="button" class="songpill" id="audio-toggle" aria-pressed="false">▶ play sound</button>
 <audio id="audio" src="audio.mp3" preload="auto" loop></audio>
 <script>
 (() => {
-  // browsers block sound until the visitor interacts, so try now and retry on each click/tap/key until it starts
+  // plays if the browser allows autoplay; otherwise the button starts it
   const a = document.getElementById('audio'), btn = document.getElementById('audio-toggle');
-  let userPaused = false;
   a.volume = 0.5;
   const ui = () => {
     const on = !a.paused;
     btn.setAttribute('aria-pressed', on);
-    btn.textContent = on ? '❚❚ sound' : '▶ sound';
-    if (on) btn.hidden = false;
+    btn.textContent = on ? "❚❚ pause sound" : "▶ play sound";
   };
   a.addEventListener('play', ui); a.addEventListener('pause', ui);
   btn.addEventListener('click', () => {
-    if (a.paused) { userPaused = false; a.play().catch(() => {}); } else { userPaused = true; a.pause(); }
+    a.paused ? a.play().catch(() => {}) : a.pause();
   });
-  const evs = ['click', 'keydown', 'touchend'];
-  const off = () => evs.forEach(t => removeEventListener(t, start, true));
-  function start(e) {
-    if (btn.contains(e.target) || userPaused || !a.paused) return off();
-    a.play().then(off).catch(() => {});
-  }
-  a.play().catch(() => evs.forEach(t => addEventListener(t, start, true)));
+  a.play().catch(() => {});
 })();
 </script>
 </body>
