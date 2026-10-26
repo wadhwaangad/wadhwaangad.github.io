@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Angad Wadhwa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Angad Wadhwa. CS + math at UW, robot learning and vision research at RAIVN Lab and AI2.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* layout: lab logbook. hero = intro + "detected" portrait, then a full-width live rollout viewer; every section is a row with its label in a left rail */
+:root{
+  --paper:#ECEFF3; --panel:#F8FAFC; --ink:#111A24; --muted:#556375; --rule:#CBD3DC; --grid:#E0E5EB;
+  --accent:#2347DD; --det:#D9630A; --ok:#16834F; --bad:#CC3238;
+  --cube-a:#2347DD; --cube-b:#16834F; --cube-c:#B3328A;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1117; --panel:#121920; --ink:#DCE3EB; --muted:#8B99AA; --rule:#25303C; --grid:#18212A;
+    --accent:#86A0FF; --det:#FF9C47; --ok:#4CC58C; --bad:#FF6E72;
+    --cube-a:#6F8BFF; --cube-b:#43B983; --cube-c:#E067B5; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1117; --panel:#121920; --ink:#DCE3EB; --muted:#8B99AA; --rule:#25303C; --grid:#18212A;
+  --accent:#86A0FF; --det:#FF9C47; --ok:#4CC58C; --bad:#FF6E72;
+  --cube-a:#6F8BFF; --cube-b:#43B983; --cube-c:#E067B5; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+a:focus-visible,button:focus-visible,canvas:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono)}
+.label{font:500 12px/1.4 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+/* nav */
+.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-block:22px}
+.nav .mark{font:500 14px var(--f-mono);text-decoration:none}
+.nav .mark b{color:var(--accent);font-weight:500}
+.nav ul{display:flex;gap:20px;list-style:none;margin:0;padding:0;font:400 13px var(--f-mono)}
+.nav ul a{text-decoration:none;color:var(--muted)}
+.nav ul a:hover{color:var(--ink)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:56px;align-items:end;padding-block:36px 40px}
+.hero h1{font:800 clamp(2.7rem,6.4vw,5rem)/.96 var(--f-display);letter-spacing:-.035em;margin:14px 0 22px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:1.12rem;max-width:58ch;margin:0 0 18px;color:var(--ink)}
+.lede .aside{color:var(--muted)}
+.now{display:inline-flex;align-items:center;gap:10px;font:400 13px var(--f-mono);color:var(--muted);margin:0 0 26px}
+.now::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 22%,transparent)}
+.links{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;font:500 14px var(--f-mono);text-decoration:none;padding:10px 16px;border:1px solid var(--ink);border-radius:999px;transition:background .15s,color .15s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.ghost{border-color:var(--rule);color:var(--muted)}
+.btn.ghost:hover{background:transparent;color:var(--ink);border-color:var(--ink)}
+.btn svg{width:16px;height:16px;fill:currentColor}
+
+.portrait{margin:0;justify-self:end;width:100%;max-width:340px}
+.frame{position:relative;aspect-ratio:500/587;max-width:100%;overflow:hidden;border-radius:4px;background:var(--grid)}
+.frame img{display:block;width:100%;height:100%;object-fit:cover}
+.frame::after{content:"";position:absolute;left:0;right:0;height:28%;top:-30%;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--det) 22%,transparent) 85%,color-mix(in srgb,var(--det) 70%,transparent));animation:scan 4.5s cubic-bezier(.5,0,.5,1) infinite;pointer-events:none;mix-blend-mode:screen}
+@keyframes scan{0%{top:-30%}70%,100%{top:105%}}
+.det{position:absolute;--c:var(--det);
+  background:
+    linear-gradient(var(--c),var(--c)) top left/16px 2px,linear-gradient(var(--c),var(--c)) top left/2px 16px,
+    linear-gradient(var(--c),var(--c)) top right/16px 2px,linear-gradient(var(--c),var(--c)) top right/2px 16px,
+    linear-gradient(var(--c),var(--c)) bottom left/16px 2px,linear-gradient(var(--c),var(--c)) bottom left/2px 16px,
+    linear-gradient(var(--c),var(--c)) bottom right/16px 2px,linear-gradient(var(--c),var(--c)) bottom right/2px 16px;
+  background-repeat:no-repeat;animation:jit 2.6s steps(6) infinite}
+.det span{position:absolute;left:0;top:0;transform:translateY(-100%);background:var(--c);color:#fff;font:500 11px/1 var(--f-mono);padding:4px 6px;white-space:nowrap}
+.det.person{left:12%;top:18%;width:66%;height:82%}
+.det.bridge{left:20%;top:1%;width:30%;height:46%;--c:var(--accent);animation-delay:-1.3s}
+.det.bridge span{transform:none}
+@keyframes jit{0%,100%{translate:0 0}33%{translate:1px -1px}66%{translate:-1px 1px}}
+figcaption{margin-top:10px;font:400 12px var(--f-mono);color:var(--muted)}
+
+/* rollout viewer */
+.bench{border:1px solid var(--rule);background:var(--panel);border-radius:6px;overflow:hidden}
+.bench-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--rule);font:400 12px var(--f-mono);color:var(--muted)}
+.bench-bar .title{display:flex;align-items:center;gap:8px}
+.rec{width:8px;height:8px;border-radius:50%;background:var(--bad);animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.controls{display:flex;gap:6px;flex-wrap:wrap}
+.controls button{font:500 12px var(--f-mono);color:var(--muted);background:transparent;border:1px solid var(--rule);border-radius:4px;padding:5px 10px;cursor:pointer}
+.controls button:hover{color:var(--ink);border-color:var(--muted)}
+.controls button[aria-pressed="true"]{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+.controls .sep{width:1px;background:var(--rule);margin:2px 4px}
+#sim{display:block;width:100%;height:clamp(320px,38vw,430px);cursor:crosshair;touch-action:manipulation}
+.bench-foot{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--rule);font:400 12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:16px;flex-wrap:wrap}
+.stats b{color:var(--ink);font-weight:500}
+#log.ok{color:var(--ok)} #log.bad{color:var(--bad)}
+.hint{margin:10px 0 0;font:400 12px var(--f-mono);color:var(--muted)}
+
+/* sections */
+.block{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px 40px;padding-block:56px;border-top:1px solid var(--rule)}
+.block:first-of-type{margin-top:64px}
+.block > header h2{font:700 1.9rem/1.1 var(--f-display);letter-spacing:-.02em;margin:8px 0 0}
+.stack{display:grid;gap:36px;min-width:0}
+.entry{display:grid;gap:6px;min-width:0}
+.entry + .entry{padding-top:36px;border-top:1px dashed var(--rule)}
+.meta{display:flex;gap:6px 16px;flex-wrap:wrap;font:400 13px var(--f-mono);color:var(--muted)}
+.entry h3{font:700 1.35rem/1.2 var(--f-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.entry h3 .org{color:var(--muted);font-weight:500}
+.entry p{margin:0;max-width:66ch}
+.entry ul{margin:6px 0 0;padding-left:18px;max-width:66ch;display:grid;gap:6px}
+.entry li::marker{color:var(--accent)}
+.pill{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:5px 8px;border-radius:3px;border:1px solid currentColor}
+.pill.live{color:var(--ok)} .pill.wip{color:var(--det)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{font:400 13px var(--f-mono);padding:4px 10px;border:1px solid var(--rule);border-radius:4px;text-decoration:none;color:var(--ink)}
+a.chip:hover{border-color:var(--accent);color:var(--accent)}
+.numbers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:12px;max-width:680px}
+.numbers div{background:var(--paper);padding:12px 14px}
+.numbers b{display:block;font:700 1.5rem/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.numbers span{font:400 12px var(--f-mono);color:var(--muted)}
+.kit{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px 24px;margin:0}
+.kit dt{font:500 13px var(--f-mono);color:var(--muted);padding-top:5px}
+.kit dd{margin:0;display:flex;gap:8px;flex-wrap:wrap}
+.kit .chip{background:var(--panel)}
+.media{margin:10px 0 6px;max-width:680px;border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--grid)}
+.media img{display:block;width:100%;height:auto}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
+.plain{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.plain li{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.plain li span:last-child{font:400 13px var(--f-mono);color:var(--muted);white-space:nowrap}
+
+footer{border-top:1px solid var(--rule);padding-block:40px 56px}
+footer .row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+footer h2{font:800 clamp(2rem,5vw,3.2rem)/1 var(--f-display);letter-spacing:-.03em;margin:0 0 18px}
+footer small{font:400 12px var(--f-mono);color:var(--muted)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:36px}
+  .portrait{justify-self:start;max-width:300px}
+  .block{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .numbers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kit{grid-template-columns:1fr;gap:6px}
+  .kit dd{margin-bottom:10px}
+  .plain li{flex-direction:column;gap:2px}
+  .nav ul{gap:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  .frame::after,.det,.rec{animation:none}
+  .frame::after{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav" aria-label="Primary">
+    <a class="mark" href="#top">angad<b>.</b>wadhwa</a>
+    <ul>
+      <li><a href="#papers">papers</a></li>
+      <li><a href="#background">about</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <div class="label">hi, i'm angad · seattle, wa</div>
+      <h1>i teach robots to pick things <em>up</em>.</h1>
+      <p class="lede">Sometimes they even do it. I study CS and math at the University of Washington and do research at RAIVN Lab and WEIRD Lab on multimodal agents and vision-language-action models, and more broadly anything where vision meets robotics. <span class="aside">Mostly I run models on real hardware and work out why they missed the cube.</span></p>
+      <div class="links">
+        <a class="btn" href="https://github.com/wadhwaangad" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          github
+        </a>
+        <a class="btn" href="https://www.linkedin.com/in/angadw/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 000 2.4v11.2A2.4 2.4 0 002.4 16h11.2a2.4 2.4 0 002.4-2.4V2.4A2.4 2.4 0 0013.6 0zM4.9 13.4H2.6V6h2.3v7.4zM3.7 5a1.3 1.3 0 110-2.7 1.3 1.3 0 010 2.7zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4z"/></svg>
+          linkedin
+        </a>
+        <a class="btn ghost" href="#papers">papers ↓</a>
+      </div>
+    </div>
+    <figure class="portrait">
+      <div class="frame">
+        <img src="me.jpg" alt="Angad on the Brooklyn Bridge" width="500" height="587">
+        <div class="det bridge" aria-hidden="true"><span>bridge 0.91</span></div>
+        <div class="det person" aria-hidden="true"><span>person 0.98</span></div>
+      </div>
+      <figcaption>fig. 1 · yolo thinks i'm a person. good sign.</figcaption>
+    </figure>
+  </header>
+
+  <section aria-label="Robot arm simulation">
+    <div class="bench">
+      <div class="bench-bar">
+        <div class="title"><span class="rec" aria-hidden="true"></span>cam_0 · side view · live rollout</div>
+        <div class="controls">
+          <button type="button" id="mode-policy" aria-pressed="true">policy</button>
+          <button type="button" id="mode-teleop" aria-pressed="false">teleop</button>
+          <span class="sep" aria-hidden="true"></span>
+          <button type="button" id="overlay" aria-pressed="true">vision overlay</button>
+          <button type="button" id="play" aria-pressed="false">pause</button>
+          <button type="button" id="reset">reset</button>
+        </div>
+      </div>
+      <canvas id="sim" tabindex="0" aria-label="A simulated robot arm picking cubes and placing them in a bin, with object detection boxes and live joint-angle traces. Click to drop a cube. In teleop mode, move the pointer to drive the arm and click to open or close the gripper."></canvas>
+      <div class="bench-foot">
+        <div class="stats">
+          <span>episode <b id="s-ep">1</b></span>
+          <span>placed <b id="s-ok">0</b></span>
+          <span>slips <b id="s-bad">0</b></span>
+          <span>success <b id="s-rate">–</b></span>
+        </div>
+        <span id="log">policy online</span>
+      </div>
+    </div>
+    <p class="hint">click the bench to drop a cube · switch to teleop to drive the arm yourself (click to grip)</p>
+  </section>
+
+  <section class="block" id="papers">
+    <header><div class="label">publications</div><h2>Papers</h2></header>
+    <div class="stack">
+      <article class="entry">
+        <div class="meta"><span class="pill live">2026</span><span>Ai2 · University of Washington</span></div>
+        <h3>MolmoAct2 <span class="org">· Action Reasoning Models for Real-world Deployment</span></h3>
+        <figure class="media">
+          <img src="molmoact2.avif" alt="MolmoAct2 overview illustration from Ai2" loading="lazy">
+        </figure>
+        <p>The next version of AI2's open action reasoning model for robot manipulation. My part: evaluating fine-tuned checkpoints on SO-100 and SO-101 hardware, benchmarking against other VLA policies, and digging into closed-loop failures.</p>
+        <div class="chips">
+          <a class="chip" href="https://arxiv.org/pdf/2605.02881" target="_blank" rel="noopener">paper ↗</a>
+          <a class="chip" href="https://github.com/allenai/molmoact2" target="_blank" rel="noopener">code ↗</a>
+          <a class="chip" href="https://allenai.org/blog/molmoact2" target="_blank" rel="noopener">blog post ↗</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="block" id="background">
+    <header><div class="label">background</div><h2>School &amp; such</h2></header>
+    <div class="entry">
+      <div class="meta"><span>class of 2028</span><span>seattle</span></div>
+      <h3>University of Washington</h3>
+      <p>B.S. Computer Science, B.A. Mathematics. TA for MATH 208, intro linear algebra, so I explain eigenvectors for fun now. Patil Endowed Scholarship recipient.</p>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="row">
+      <div>
+        <div class="label">contact</div>
+        <h2>say hi.</h2>
+        <div class="links">
+          <a class="btn" href="https://github.com/wadhwaangad" target="_blank" rel="noopener">github ↗</a>
+          <a class="btn" href="https://www.linkedin.com/in/angadw/" target="_blank" rel="noopener">linkedin ↗</a>
+        </div>
+      </div>
+      <small>built with a canvas and some inverse kinematics.<br>no cubes were harmed.</small>
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('sim');
+  const ctx = cv.getContext('2d');
+  const $ = id => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // colors come from the page tokens so the sim follows the theme
+  const C = {};
+  const readTokens = () => {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['paper','panel','ink','muted','rule','grid','accent','det','ok','bad','cube-a','cube-b','cube-c'])
+      C[k] = cs.getPropertyValue('--' + k).trim();
+  };
+  readTokens();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readTokens(); if (!running) draw(); });
+  new MutationObserver(() => { readTokens(); if (!running) draw(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---- world ----
+  let W = 0, H = 0, G = {};
+  let cubes = [], nextId = 1, simT = 0;
+  const ee = { x: 0, y: 0 };
+  let grip = 1, gripT = 1;              // 1 = open, 0 = closed
+  let mode = 'policy', overlay = true, running = !reduce, visible = true;
+  let waypoint = null, pointer = null, pendingGrab = null;
+  const hist = []; let histAcc = 0;
+  const P = { state: 'choose', t: 0, target: null, place: null, ep: 1, ok: 0, bad: 0 };
+  const cubeColors = ['cube-a', 'cube-b', 'cube-c'];
+
+  function layout() {
+    const r = cv.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const changed = Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1;
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const groundY = H - 34;
+    const L = Math.min((H - 70) / 1.4, (W - 48) / 2.2, 200);
+    const sx = 24 + L * 0.2;
+    const s = Math.max(14, L * 0.2);
+    G = {
+      groundY, L, s, sx, sy: groundY - L * 0.3, L1: L, L2: L, grip: L * 0.3,
+      binX: sx + L * 0.66, binW: s * 2.4, binH: s * 1.4,
+      zone: [sx + L * 1.08, sx + L * 1.8],
+      safeY: groundY - s * 4.4,
+      panelX: sx + L * 2.1 + 28
+    };
+    if (changed) resetWorld(true);
+    if (!running) draw();
+  }
+
+  function resetWorld(settled) {
+    cubes = []; P.state = 'choose'; P.t = 0; P.target = null; pendingGrab = null;
+    ee.x = G.sx + G.L * 1.2; ee.y = G.safeY; grip = gripT = 1;
+    spawn(3, settled);
+  }
+
+  function spawn(n, settled) {
+    const [a, b] = G.zone, xs = [];
+    for (let i = 0; i < n; i++) {
+      let x, tries = 0;
+      do { x = a + Math.random() * (b - a); tries++; } while (tries < 30 && xs.some(o => Math.abs(o - x) < G.s * 1.3));
+      xs.push(x);
+      cubes.push({
+        id: nextId++, x, y: settled ? G.groundY : 20 + Math.random() * 40 + G.s, vy: 0,
+        held: false, rest: !!settled, inBin: false, color: cubeColors[(nextId) % 3], slip: false
+      });
+    }
+  }
+
+  function dropCube(x, y) {
+    if (cubes.filter(c => !c.inBin).length >= 9) { log('bench is full, let it clear some', 'bad'); return; }
+    x = Math.max(G.sx + G.L * 0.3, Math.min(G.zone[1] + G.s * 0.4, x));
+    y = Math.min(y, G.groundY - G.s * 2);
+    cubes.push({ id: nextId++, x, y, vy: 0, held: false, rest: false, inBin: false, color: cubeColors[nextId % 3], slip: false });
+    log(`spawned cube_${pad(nextId - 1)}`);
+  }
+
+  const pad = n => String(n).padStart(2, '0');
+
+  // top of whatever a cube at x would land on
+  function supportAt(x, self) {
+    let top = G.groundY;
+    for (const o of cubes) {
+      if (o === self || o.held) continue;
+      if (Math.abs(o.x - x) < G.s * 0.92 && (!self || o.y - G.s >= self.y - 0.5)) top = Math.min(top, o.y - G.s);
+    }
+    return top;
+  }
+  const covered = c => cubes.some(o => o !== c && !o.held && Math.abs(o.x - c.x) < G.s * 0.92 && Math.abs(o.y - (c.y - G.s)) < 2);
+
+  // ---- kinematics ----
+  function solve(tx, ty) {
+    let dx = tx - G.sx, dy = G.sy - (ty - G.grip);
+    let d = Math.hypot(dx, dy);
+    const R = G.L1 + G.L2 - 0.5;
+    if (d > R) { dx *= R / d; dy *= R / d; d = R; }
+    d = Math.max(d, 1);
+    const c2 = (d * d - G.L1 * G.L1 - G.L2 * G.L2) / (2 * G.L1 * G.L2);
+    const q2 = Math.acos(Math.max(-1, Math.min(1, c2)));
+    const q1 = Math.atan2(dy, dx) + Math.atan2(G.L2 * Math.sin(q2), G.L1 + G.L2 * Math.cos(q2));
+    const ex = G.sx + G.L1 * Math.cos(q1), ey = G.sy - G.L1 * Math.sin(q1);
+    const wx = G.sx + dx, wy = G.sy - dy;
+    return { q1, q2, ex, ey, wx, wy, tx: wx, ty: wy + G.grip };
+  }
+
+  function moveToward(wp, dt, speed) {
+    const dx = wp.x - ee.x, dy = wp.y - ee.y, d = Math.hypot(dx, dy);
+    if (d < 0.8) { ee.x = wp.x; ee.y = wp.y; return true; }
+    let step = Math.max(d * (1 - Math.exp(-dt * 5)), 36 * dt);
+    step = Math.min(step, d, G.L * speed * dt);
+    ee.x += dx / d * step; ee.y += dy / d * step;
+    ee.y = Math.min(ee.y, G.groundY - 1);
+    return false;
+  }
+
+  // ---- policy (scripted; it's a website) ----
+  function setState(s) { P.state = s; P.t = 0; }
+  function graspable(c) {
+    return c && !c.held && c.rest && !c.inBin && !covered(c) && cubes.includes(c);
+  }
+  function choosePlace() {
+    const cols = [G.binX - G.s * 0.6, G.binX + G.s * 0.6];
+    const tops = cols.map(x => supportAt(x, null));
+    const i = tops[0] >= tops[1] ? 0 : 1;
+    return { x: cols[i], top: tops[i] };
+  }
+
+  function policyStep(dt) {
+    P.t += dt;
+    const s = G.s, c = P.target;
+    switch (P.state) {
+      case 'choose': {
+        gripT = 1;
+        waypoint = { x: ee.x, y: Math.min(ee.y, G.safeY) };
+        if (P.t < 0.3) break;
+        const cand = cubes.filter(graspable).sort((a, b) => Math.abs(a.x - ee.x) - Math.abs(b.x - ee.x));
+        if (cand.length) { P.target = cand[0]; setState('approach'); log(`target: cube_${pad(cand[0].id)}`); break; }
+        if (cubes.some(o => !o.rest && !o.held)) break;
+        if (P.t > 1.0) {
+          const n = cubes.filter(o => o.inBin).length;
+          log(`episode ${P.ep} done · ${n} in bin · resetting`, 'ok');
+          P.ep++; cubes = cubes.filter(o => !o.inBin); spawn(3 + (Math.random() < 0.4 ? 1 : 0), false);
+          setState('choose');
+        }
+        break;
+      }
+      case 'approach':
+        if (!graspable(c)) { setState('choose'); break; }
+        waypoint = { x: c.x, y: c.y - s - s * 1.5 };
+        if (moveToward(waypoint, dt, 2.4)) setState('descend');
+        return;
+      case 'descend':
+        if (!graspable(c)) { setState('retreat'); break; }
+        waypoint = { x: c.x, y: c.y - s * 0.5 };
+        if (moveToward(waypoint, dt, 1.2)) { setState('grasp'); gripT = 0; }
+        return;
+      case 'grasp':
+        gripT = 0;
+        if (grip < 0.06) {
+          c.held = true; c.rest = false; c.slip = Math.random() < 0.13; c.slipAt = s * (1 + Math.random() * 1.6);
+          P.liftFrom = ee.y; setState('lift');
+        }
+        break;
+      case 'lift':
+        waypoint = { x: ee.x, y: G.safeY };
+        if (c.slip && P.liftFrom - ee.y > c.slipAt) {
+          c.held = false; c.vy = 0; P.bad++; gripT = 1;
+          log(`fail: grasp slip on cube_${pad(c.id)}, retrying`, 'bad'); setState('retreat'); break;
+        }
+        if (moveToward(waypoint, dt, 1.6)) { P.place = choosePlace(); setState('carry'); }
+        return;
+      case 'carry':
+        waypoint = { x: P.place.x, y: G.safeY };
+        if (moveToward(waypoint, dt, 2.4)) { P.place = choosePlace(); setState('lower'); }
+        return;
+      case 'lower':
+        waypoint = { x: P.place.x, y: P.place.top - s * 0.4 - 2 };
+        if (moveToward(waypoint, dt, 1.2)) { gripT = 1; setState('release'); }
+        return;
+      case 'release':
+        gripT = 1;
+        if (grip > 0.35 && c && c.held) { c.held = false; c.vy = 0; P.ok++; log(`placed cube_${pad(c.id)}`, 'ok'); }
+        if (P.t > 0.3) setState('retreat');
+        break;
+      case 'retreat':
+        gripT = 1;
+        waypoint = { x: ee.x, y: G.safeY };
+        if (moveToward(waypoint, dt, 1.8)) setState('choose');
+        return;
+    }
+    if (waypoint) moveToward(waypoint, dt, 2);
+  }
+
+  function teleopStep(dt) {
+    if (pointer) {
+      const x = Math.max(G.sx + G.L * 0.3, Math.min(G.sx + G.L * 1.95, pointer.x));
+      waypoint = { x, y: Math.min(pointer.y, G.groundY - 1) };
+      moveToward(waypoint, dt, 4);
+    }
+    if (pendingGrab && grip < 0.08) {
+      if (graspableTeleop(pendingGrab)) { pendingGrab.held = true; pendingGrab.rest = false; pendingGrab.inBin = false; log(`grasped cube_${pad(pendingGrab.id)}`, 'ok'); }
+      pendingGrab = null;
+    }
+  }
+  function graspableTeleop(c) {
+    const t = solve(ee.x, ee.y);
+    return !c.held && !covered(c) && Math.abs(c.x - t.tx) < G.s * 0.6 && t.ty > c.y - G.s - 4 && t.ty < c.y + 4;
+  }
+  function toggleGrip() {
+    const held = cubes.find(c => c.held);
+    if (held) { held.held = false; held.vy = 0; gripT = 1; log(`released cube_${pad(held.id)}`); return; }
+    if (gripT === 0) { gripT = 1; return; }
+    gripT = 0;
+    pendingGrab = cubes.find(graspableTeleop) || null;
+    if (!pendingGrab) log('grabbed air');
+  }
+
+  // ---- physics ----
+  function physics(dt, arm) {
+    for (const c of cubes) {
+      if (c.held) { c.x = arm.tx; c.y = arm.ty + G.s * 0.5; c.vy = 0; continue; }
+      if (c.rest) {
+        if (supportAt(c.x, c) > c.y + 0.5) c.rest = false; else continue;
+      }
+      c.vy += 1800 * dt;
+      const top = supportAt(c.x, c);
+      c.y += c.vy * dt;
+      if (c.y >= top) {
+        c.y = top; c.vy = 0; c.rest = true;
+        c.inBin = Math.abs(c.x - G.binX) < G.binW / 2;
+      }
+    }
+  }
+
+  // ---- drawing ----
+  function draw() {
+    const s = G.s;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = C.panel; ctx.fillRect(0, 0, W, H);
+
+    // calibration grid
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = 0.5; x < W; x += 24) { ctx.moveTo(x, 0); ctx.lineTo(x, G.groundY); }
+    for (let y = G.groundY + 0.5; y > 0; y -= 24) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+
+    // table
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.moveTo(0, G.groundY + 0.75); ctx.lineTo(W, G.groundY + 0.75); ctx.stroke();
+    ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = -20; x < W; x += 10) { ctx.moveTo(x, G.groundY + 12); ctx.lineTo(x + 10, G.groundY + 2); }
+    ctx.stroke();
+
+    // HUD text
+    ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
+    ctx.fillStyle = C.muted; ctx.textBaseline = 'top';
+    ctx.fillText(`t=${simT.toFixed(1)}s  mode=${mode}${mode === 'policy' ? '  state=' + P.state : ''}`, 14, 12);
+
+    const arm = solve(ee.x, ee.y);
+
+    // bin
+    const bx0 = G.binX - G.binW / 2, bx1 = G.binX + G.binW / 2, bt = G.groundY - G.binH;
+    ctx.fillStyle = C.grid; ctx.fillRect(bx0, bt, G.binW, G.binH);
+
+    // cubes
+    for (const c of cubes) {
+      ctx.fillStyle = C[c.color];
+      ctx.fillRect(c.x - s / 2, c.y - s, s, s);
+      ctx.fillStyle = 'rgba(255,255,255,.22)';
+      ctx.fillRect(c.x - s / 2, c.y - s, s, s * 0.22);
+    }
+    ctx.strokeStyle = C.muted; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(bx0, bt); ctx.lineTo(bx0, G.groundY); ctx.lineTo(bx1, G.groundY); ctx.lineTo(bx1, bt); ctx.stroke();
+
+    // arm
+    const lw = Math.max(6, G.L * 0.08);
+    ctx.fillStyle = C.ink;
+    roundRect(G.sx - G.L * 0.2, G.groundY - 6, G.L * 0.4, 6, 2); ctx.fill();
+    roundRect(G.sx - G.L * 0.11, G.sy, G.L * 0.22, G.groundY - G.sy, 3); ctx.fill();
+    ctx.lineCap = 'round'; ctx.strokeStyle = C.ink;
+    ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(G.sx, G.sy); ctx.lineTo(arm.ex, arm.ey); ctx.stroke();
+    ctx.lineWidth = lw * 0.82; ctx.beginPath(); ctx.moveTo(arm.ex, arm.ey); ctx.lineTo(arm.wx, arm.wy); ctx.stroke();
+    // gripper
+    const half = s * 0.52 + grip * s * 0.42, palmY = arm.wy + G.grip * 0.45;
+    ctx.lineWidth = Math.max(3, lw * 0.45);
+    ctx.beginPath(); ctx.moveTo(arm.wx, arm.wy); ctx.lineTo(arm.wx, palmY);
+    ctx.moveTo(arm.wx - half, palmY); ctx.lineTo(arm.wx + half, palmY);
+    ctx.moveTo(arm.wx - half, palmY); ctx.lineTo(arm.wx - half, arm.ty);
+    ctx.moveTo(arm.wx + half, palmY); ctx.lineTo(arm.wx + half, arm.ty);
+    ctx.stroke();
+    for (const [x, y] of [[G.sx, G.sy], [arm.ex, arm.ey], [arm.wx, arm.wy]]) {
+      ctx.beginPath(); ctx.arc(x, y, lw * 0.62, 0, Math.PI * 2);
+      ctx.fillStyle = C.panel; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = C.accent; ctx.stroke();
+    }
+
+    if (overlay) drawOverlay(arm);
+    drawTraces();
+  }
+
+  function drawOverlay(arm) {
+    const s = G.s;
+    ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
+    ctx.textBaseline = 'alphabetic';
+    for (const c of cubes) {
+      const p = 4, j = running ? Math.sin(simT * 9 + c.id * 3) * 0.8 : 0;
+      const conf = c.held ? 0.81 + 0.04 * Math.sin(simT * 2 + c.id) : c.rest ? 0.9 + 0.06 * Math.sin(simT * 1.3 + c.id) : 0.62 + 0.1 * Math.sin(simT * 7);
+      brackets(c.x - s / 2 - p + j, c.y - s - p - j, s + p * 2, s + p * 2, C.det);
+      tag(`cube_${pad(c.id)} ${conf.toFixed(2)}`, c.x - s / 2 - p + j, c.y - s - p - j, C.det);
+    }
+    // bin
+    brackets(G.binX - G.binW / 2 - 6, G.groundY - G.binH - 6, G.binW + 12, G.binH + 8, C.muted);
+    // end effector keypoint, in meters (one link ≈ 0.12 m on an SO-100-ish arm)
+    const m = 0.12 / G.L, xm = (arm.tx - G.sx) * m, zm = (G.groundY - arm.ty) * m;
+    ctx.strokeStyle = C.accent; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(arm.tx, arm.ty, 5, 0, Math.PI * 2);
+    ctx.moveTo(arm.tx - 9, arm.ty); ctx.lineTo(arm.tx + 9, arm.ty); ctx.moveTo(arm.tx, arm.ty - 9); ctx.lineTo(arm.tx, arm.ty + 9); ctx.stroke();
+    ctx.fillStyle = C.accent;
+    ctx.fillText(`ee x=${xm.toFixed(3)} z=${zm.toFixed(3)}`, arm.tx + 12, arm.ty - 10);
+
+    // predicted action chunk: 8 future waypoints, noisy early in a segment and settling as it goes
+    if (waypoint && mode === 'policy') {
+      const dx = waypoint.x - ee.x, dy = waypoint.y - ee.y, d = Math.hypot(dx, dy);
+      if (d > 6) {
+        const h = Math.min(1, (G.L * 0.9) / d), noise = 7 * Math.exp(-P.t * 3);
+        let lx = 0, ly = 0;
+        for (let k = 1; k <= 8; k++) {
+          const f = (k / 8) * h;
+          lx = ee.x + dx * f + (Math.random() - 0.5) * noise;
+          ly = ee.y + dy * f + (Math.random() - 0.5) * noise;
+          ctx.globalAlpha = 1 - k * 0.09;
+          ctx.beginPath(); ctx.arc(lx, ly, 2.6, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillText('a[t:t+8]', lx + 8, ly + 4);
+      }
+    }
+  }
+
+  function drawTraces() {
+    const x0 = G.panelX, x1 = W - 20, y0 = 40, y1 = G.groundY - 16, w = x1 - x0, h = y1 - y0;
+    if (w < 200 || h < 120) return;
+    ctx.fillStyle = C.panel; ctx.fillRect(x0, y0, w, h);
+    ctx.strokeStyle = C.rule; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, y0 + 0.5, w - 1, h - 1);
+    ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace'; ctx.textBaseline = 'top';
+    ctx.fillStyle = C.muted;
+    ctx.fillText('joint state · last 6 s', x0 + 12, y0 + 10);
+    const rt = 'policy: scripted (it’s a website)';
+    ctx.fillText(rt, x1 - 12 - ctx.measureText(rt).width, y0 + 10);
+    const gx0 = x0 + 12, gx1 = x1 - 12, gy0 = y0 + 34, gy1 = y1 - 34;
+    ctx.strokeStyle = C.grid; ctx.beginPath();
+    for (let i = 0; i <= 4; i++) { const y = Math.round(gy0 + (gy1 - gy0) * i / 4) + 0.5; ctx.moveTo(gx0, y); ctx.lineTo(gx1, y); }
+    ctx.stroke();
+    const series = [
+      ['q1 shoulder', C.accent, p => (p.q1 + 0.2) / (Math.PI + 0.4)],
+      ['q2 elbow', C['cube-c'], p => p.q2 / Math.PI],
+      ['gripper', C.det, p => p.g]
+    ];
+    const N = 180;
+    ctx.lineWidth = 1.75; ctx.lineJoin = 'round';
+    for (const [, col, f] of series) {
+      if (hist.length < 2) break;
+      ctx.strokeStyle = col; ctx.beginPath();
+      hist.forEach((p, i) => {
+        const x = gx1 - (hist.length - 1 - i) / (N - 1) * (gx1 - gx0);
+        const y = gy1 - Math.max(0, Math.min(1, f(p))) * (gy1 - gy0);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      });
+      ctx.stroke();
+      const p = hist[hist.length - 1], y = gy1 - Math.max(0, Math.min(1, f(p))) * (gy1 - gy0);
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(gx1, y, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    let lx = gx0; ctx.textBaseline = 'middle';
+    for (const [name, col] of series) {
+      ctx.fillStyle = col; ctx.fillRect(lx, y1 - 18, 10, 2);
+      ctx.fillStyle = C.muted; ctx.fillText(name, lx + 16, y1 - 17);
+      lx += ctx.measureText(name).width + 34;
+    }
+    const last = hist[hist.length - 1];
+    if (last) {
+      const t = `${(last.q1 * 180 / Math.PI).toFixed(0)}°  ${(last.q2 * 180 / Math.PI).toFixed(0)}°`;
+      ctx.fillStyle = C.ink; ctx.fillText(t, gx1 - ctx.measureText(t).width, y1 - 17);
+    }
+  }
+
+  function brackets(x, y, w, h, col) {
+    const k = Math.min(8, w / 3);
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.beginPath();
+    ctx.moveTo(x, y + k); ctx.lineTo(x, y); ctx.lineTo(x + k, y);
+    ctx.moveTo(x + w - k, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + k);
+    ctx.moveTo(x + w, y + h - k); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - k, y + h);
+    ctx.moveTo(x + k, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - k);
+    ctx.stroke();
+  }
+  function tag(text, x, y, col) {
+    const w = ctx.measureText(text).width + 8;
+    ctx.fillStyle = col; ctx.fillRect(x, y - 14, w, 14);
+    ctx.fillStyle = C.paper; ctx.fillText(text, x + 4, y - 4);
+  }
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+
+  // ---- ui ----
+  const logEl = $('log');
+  function log(msg, tone) { logEl.textContent = msg; logEl.className = tone || ''; }
+  function stats() {
+    $('s-ep').textContent = P.ep; $('s-ok').textContent = P.ok; $('s-bad').textContent = P.bad;
+    const n = P.ok + P.bad;
+    $('s-rate').textContent = n ? Math.round(P.ok / n * 100) + '%' : '–';
+  }
+
+  function setMode(m) {
+    mode = m;
+    $('mode-policy').setAttribute('aria-pressed', m === 'policy');
+    $('mode-teleop').setAttribute('aria-pressed', m === 'teleop');
+    cv.style.touchAction = m === 'teleop' ? 'none' : 'manipulation';
+    pendingGrab = null;
+    const held = cubes.find(c => c.held);
+    if (m === 'policy') {
+      if (held) { P.target = held; held.slip = false; P.place = choosePlace(); setState('carry'); }
+      else setState('choose');
+      log('policy online');
+    } else {
+      pointer = null; waypoint = null; if (!held) gripT = 1;
+      log('teleop: move to drive, click to grip');
+    }
+    if (!running) setRunning(true);
+  }
+  $('mode-policy').onclick = () => setMode('policy');
+  $('mode-teleop').onclick = () => setMode('teleop');
+  $('overlay').onclick = e => { overlay = !overlay; e.currentTarget.setAttribute('aria-pressed', overlay); if (!running) draw(); };
+  $('reset').onclick = () => { P.ep = 1; P.ok = 0; P.bad = 0; hist.length = 0; resetWorld(false); stats(); log('reset'); if (!running) draw(); };
+  $('play').onclick = () => setRunning(!running);
+  function setRunning(r) {
+    running = r;
+    $('play').textContent = r ? 'pause' : 'play';
+    $('play').setAttribute('aria-pressed', !r);
+    if (r) { last = performance.now(); requestAnimationFrame(frame); }
+  }
+
+  const local = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  cv.addEventListener('pointermove', e => { if (mode === 'teleop') pointer = local(e); });
+  cv.addEventListener('pointerdown', e => {
+    const p = local(e);
+    if (mode === 'teleop') { pointer = p; toggleGrip(); }
+    else dropCube(p.x, p.y);
+    if (!running) setRunning(true);
+  });
+  cv.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dropCube(G.zone[0] + Math.random() * (G.zone[1] - G.zone[0]), 40); if (!running) setRunning(true); }
+  });
+
+  new ResizeObserver(layout).observe(cv);
+  new IntersectionObserver(([en]) => {
+    const was = visible; visible = en.isIntersecting;
+    if (visible && !was && running) { last = performance.now(); requestAnimationFrame(frame); }
+  }).observe(cv);
+
+  let last = performance.now();
+  function frame(now) {
+    if (!running || !visible) return;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    simT += dt;
+    if (mode === 'policy') policyStep(dt); else teleopStep(dt);
+    grip += (gripT - grip) * Math.min(1, dt * 9);
+    const arm = solve(ee.x, ee.y);
+    physics(dt, arm);
+    histAcc += dt;
+    while (histAcc >= 1 / 30) { histAcc -= 1 / 30; hist.push({ q1: arm.q1, q2: arm.q2, g: grip }); if (hist.length > 180) hist.shift(); }
+    draw(); stats();
+    requestAnimationFrame(frame);
+  }
+
+  layout();
+  // seed the traces so the first frame isn't empty
+  { const a = solve(ee.x, ee.y); for (let i = 0; i < 180; i++) hist.push({ q1: a.q1, q2: a.q2, g: 1 }); }
+  if (reduce) { setRunning(false); log('paused (reduced motion) · press play'); draw(); }
+  else setRunning(true);
+})();
+</script>
+</body>
+</html>
