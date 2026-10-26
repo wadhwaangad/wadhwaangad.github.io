@@ -127,6 +127,8 @@ a.chip:hover{border-color:var(--accent);color:var(--accent)}
 .kit .chip{background:var(--panel)}
 .media{margin:10px 0 6px;max-width:680px;border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--grid)}
 .media img{display:block;width:100%;height:auto}
+.entry p.authors{font-size:.95rem;color:var(--muted)}
+.entry p.authors b{color:var(--ink);font-weight:600}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 .plain{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .plain li{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--rule);padding-bottom:10px}
@@ -226,12 +228,13 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
     <header><div class="label">publications</div><h2>Papers</h2></header>
     <div class="stack">
       <article class="entry">
-        <div class="meta"><span class="pill live">2026</span><span>Ai2 · University of Washington</span></div>
+        <div class="meta"><span class="pill live">2026</span><span>arXiv 2605.02881</span><span>Ai2 · University of Washington</span></div>
         <h3>MolmoAct2 <span class="org">· Action Reasoning Models for Real-world Deployment</span></h3>
         <figure class="media">
           <img src="molmoact2.avif" alt="MolmoAct2 overview illustration from Ai2" loading="lazy">
         </figure>
-        <p>The next version of AI2's open action reasoning model for robot manipulation. My part: evaluating fine-tuned checkpoints on SO-100 and SO-101 hardware, benchmarking against other VLA policies, and digging into closed-loop failures.</p>
+        <p class="authors">Haoquan Fang, Jiafei Duan, Donovan Clay, Sam Wang, … <b>Angad Wadhwa</b>, … Ali Farhadi, Dieter Fox, Ranjay Krishna</p>
+        <p>An open action reasoning model for robots that work in the real world. It pairs MolmoER, a vision-language backbone for spatial and embodied reasoning, with a flow-matching action expert, and adds OpenFAST, an open action tokenizer, plus MolmoThink, a variant that adapts how deeply it reasons. It ships with three new datasets, including 720 hours of bimanual teleoperation, and is evaluated on 7 simulated and real-world robot benchmarks and 13 embodied-reasoning benchmarks.</p>
         <div class="chips">
           <a class="chip" href="https://arxiv.org/pdf/2605.02881" target="_blank" rel="noopener">paper ↗</a>
           <a class="chip" href="https://github.com/allenai/molmoact2" target="_blank" rel="noopener">code ↗</a>
