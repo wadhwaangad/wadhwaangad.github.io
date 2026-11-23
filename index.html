@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Angad Wadhwa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Angad Wadhwa. CS + math at UW, robot learning and vision research at RAIVN Lab and AI2.">
+<meta name="description" content="Angad Wadhwa. CS + math at UW. Research in robotics and computer vision: spatial intelligence, visual understanding, and physical intelligence.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -127,6 +127,17 @@ a.chip:hover{border-color:var(--accent);color:var(--accent)}
 .kit .chip{background:var(--panel)}
 .media{margin:10px 0 6px;max-width:680px;border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--grid)}
 .media img{display:block;width:100%;height:auto}
+.media.figure{background:#fff;padding:8px} /* white-background paper figures stay legible in dark mode */
+.interests{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.interests li{background:var(--panel);padding:18px 18px 20px;display:grid;gap:6px;align-content:start}
+.interests h3{font:700 1.15rem/1.2 var(--f-display);letter-spacing:-.01em;margin:0}
+.interests p{margin:0;font-size:.95rem;color:var(--muted)}
+.interests .label{color:var(--accent)}
+.news{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.news li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:16px;max-width:76ch}
+.news time{font:400 13px var(--f-mono);color:var(--muted);padding-top:2px}
+.news a{color:var(--accent);text-decoration:none}
+.news a:hover{text-decoration:underline}
 .entry p.authors{font-size:.95rem;color:var(--muted)}
 .entry p.authors b{color:var(--ink);font-weight:600}
 .track{display:flex;align-items:center;gap:20px 28px;flex-wrap:wrap}
@@ -140,7 +151,15 @@ a.chip:hover{border-color:var(--accent);color:var(--accent)}
 .track.playing .eq i{animation-play-state:running}
 .songbtn{cursor:pointer;background:transparent}
 .songbtn:disabled{opacity:.5;cursor:default}
-.songpill{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font:500 12px var(--f-mono);color:var(--paper);background:var(--ink);border:0;border-radius:999px;padding:9px 14px;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.songpill{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:10px;font:500 12px var(--f-mono);color:var(--paper);background:var(--ink);border:0;border-radius:999px;padding:9px 16px 9px 12px;min-height:40px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.18);transition:transform .15s}
+.songpill:hover{transform:translateY(-1px)}
+.songpill:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.songpill:disabled{opacity:.55;cursor:default;transform:none}
+.songpill .bars{display:flex;align-items:flex-end;gap:2px;height:12px}
+.songpill .bars i{width:2px;height:100%;background:currentColor;border-radius:1px;transform-origin:bottom;transform:scaleY(.35);animation:eq 1s ease-in-out infinite paused}
+.songpill .bars i:nth-child(2){animation-delay:-.35s}.songpill .bars i:nth-child(3){animation-delay:-.7s}
+.songpill[aria-pressed="true"] .bars i{animation-play-state:running}
+footer#contact{padding-bottom:96px} /* room so the fixed sound button never covers footer content */
 @keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
 .plain{list-style:none;margin:0;padding:0;display:grid;gap:10px}
@@ -157,6 +176,7 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
   .portrait{justify-self:start;max-width:300px}
   .block{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
+  .interests{grid-template-columns:1fr}
 }
 @media (max-width:560px){
   .numbers{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -164,9 +184,10 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
   .kit dd{margin-bottom:10px}
   .plain li{flex-direction:column;gap:2px}
   .nav ul{gap:14px}
+  .news li{grid-template-columns:1fr;gap:2px}
 }
 @media (prefers-reduced-motion:reduce){
-  .frame::after,.det,.rec,.eq i{animation:none}
+  .frame::after,.det,.rec,.eq i,.songpill .bars i{animation:none}
   .frame::after{display:none}
 }
 </style>
@@ -177,6 +198,8 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
   <nav class="nav" aria-label="Primary">
     <a class="mark" href="#top">angad<b>.</b>wadhwa</a>
     <ul>
+      <li><a href="#research">research</a></li>
+      <li><a href="#news">news</a></li>
       <li><a href="#papers">papers</a></li>
       <li><a href="#background">about</a></li>
       <li><a href="#contact">contact</a></li>
@@ -185,9 +208,9 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
 
   <header class="hero" id="top">
     <div>
-      <div class="label">hi, i'm angad · seattle, wa</div>
-      <h1>i teach robots to pick things <em>up</em>.</h1>
-      <p class="lede">Sometimes they even do it. I study CS and math at the University of Washington and do research at RAIVN Lab and WEIRD Lab on multimodal agents and vision-language-action models, and more broadly anything where vision meets robotics. <span class="aside">Mostly I run models on real hardware and work out why they missed the cube.</span></p>
+      <div class="label">angad wadhwa · robotics &amp; vision · seattle, wa</div>
+      <h1>robots that <em>understand</em> the physical world.</h1>
+      <p class="lede">I study CS and math at the University of Washington and do research at RAIVN Lab and WEIRD Lab in robotics and computer vision. I work on how embodied agents perceive, reason about, and act in 3D space, with a focus on spatial intelligence, visual understanding, and physical intelligence. <span class="aside">Most of that means running models on real hardware and working out why they missed the cube.</span></p>
       <div class="links">
         <a class="btn" href="https://github.com/wadhwaangad" target="_blank" rel="noopener">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -196,6 +219,14 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
         <a class="btn" href="https://www.linkedin.com/in/angadw/" target="_blank" rel="noopener">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.6 0H2.4A2.4 2.4 0 000 2.4v11.2A2.4 2.4 0 002.4 16h11.2a2.4 2.4 0 002.4-2.4V2.4A2.4 2.4 0 0013.6 0zM4.9 13.4H2.6V6h2.3v7.4zM3.7 5a1.3 1.3 0 110-2.7 1.3 1.3 0 010 2.7zm9.7 8.4h-2.3V9.8c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.7H6.2V6h2.2v1h.1c.3-.6 1.1-1.2 2.2-1.2 2.4 0 2.8 1.6 2.8 3.6v4z"/></svg>
           linkedin
+        </a>
+        <a class="btn" href="https://scholar.google.com/citations?hl=en&amp;user=5c6kf2MAAAAJ" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 0 5.5 8 10l6-3.38V11h1.5V5.5L8 1zM3 8.3V11c0 1.38 2.24 2.5 5 2.5s5-1.12 5-2.5V8.3L8 11.1 3 8.3z"/></svg>
+          scholar
+        </a>
+        <a class="btn" href="https://openreview.net/profile?id=~Angad_Wadhwa1" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M2 1h12v14H2V1zm2 3v1.5h8V4H4zm0 3.25v1.5h8v-1.5H4zm0 3.25V12h5v-1.5H4z"/></svg>
+          openreview
         </a>
         <a class="btn ghost" href="#papers">papers ↓</a>
       </div>
@@ -206,7 +237,7 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
         <div class="det bridge" aria-hidden="true"><span>bridge 0.91</span></div>
         <div class="det person" aria-hidden="true"><span>person 0.98</span></div>
       </div>
-      <figcaption>fig. 1 · yolo thinks i'm a person. good sign.</figcaption>
+      <figcaption>fig. 1 · detector output: person (0.98), bridge (0.91).</figcaption>
     </figure>
   </header>
 
@@ -237,9 +268,59 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
     <p class="hint">click the bench to drop a cube · switch to teleop to drive the arm yourself (click to grip)</p>
   </section>
 
+  <section class="block" id="research">
+    <header><div class="label">research</div><h2>Interests</h2></header>
+    <div class="stack">
+      <div class="entry">
+        <p>My research is mostly in <b>robotics</b> and <b>computer vision</b>. I'm interested in what it takes for a robot to understand a scene well enough to act in it reliably: perceiving geometry and dynamics, grounding language in what it sees, and turning that understanding into robust physical behavior. Lately that has meant vision-language-action models and using foundation models as zero-shot critics and reward models for robot learning.</p>
+      </div>
+      <ul class="interests">
+        <li>
+          <span class="label">01</span>
+          <h3>Spatial intelligence</h3>
+          <p>3D scene understanding and reasoning about geometry, layout, and object relations for embodied agents.</p>
+        </li>
+        <li>
+          <span class="label">02</span>
+          <h3>Visual understanding</h3>
+          <p>Grounding vision-language models in what is actually happening in a scene, especially across video and time.</p>
+        </li>
+        <li>
+          <span class="label">03</span>
+          <h3>Physical intelligence</h3>
+          <p>Policies that manipulate the real world, and the reward signals and evaluation that make them learn and generalize.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="news">
+    <header><div class="label">updates</div><h2>News</h2></header>
+    <ul class="news">
+      <li><time datetime="2026-11">nov 2026</time><span><a href="https://weirdlabuw.github.io/dna/" target="_blank" rel="noopener">D&amp;A</a>, our work on VLMs as zero-shot robotic reward models, is out on <a href="https://arxiv.org/abs/2611.03622" target="_blank" rel="noopener">arXiv</a>, with <a href="https://github.com/memmelma/dna" target="_blank" rel="noopener">code</a> and the <a href="https://huggingface.co/datasets/memmelma/dnabench" target="_blank" rel="noopener">D&amp;A-Bench</a> dataset.</span></li>
+      <li><time datetime="2026-05">may 2026</time><span><a href="https://allenai.org/blog/molmoact2" target="_blank" rel="noopener">MolmoAct2</a>, Ai2's open action reasoning model for real-world robots, is released.</span></li>
+    </ul>
+  </section>
+
   <section class="block" id="papers">
     <header><div class="label">publications</div><h2>Papers</h2></header>
     <div class="stack">
+      <article class="entry" id="dna">
+        <div class="meta"><span class="pill live">2026</span><span>arXiv 2611.03622</span><span>WEIRD Lab · University of Washington</span></div>
+        <h3>D&amp;A <span class="org">· Decoupling Description and Assessment Enables VLMs as Zero-Shot Robotic Reward Models</span></h3>
+        <figure class="media figure">
+          <img src="dna-method.png" alt="D&amp;A method overview: a VLM first describes the scene dynamics of a robot video, then assesses task progress against explicit rubrics." loading="lazy" width="2680" height="856">
+        </figure>
+        <p class="authors">Marius Memmel, Shawn Yin, Urvi Rutia, <b>Angad Wadhwa</b>, Eldon Li, Gavin Angeloff, Ankit Goyal, Jesse Zhang, Dieter Fox, Fabio Ramos, Anqi Li, Abhishek Gupta</p>
+        <p>VLMs used to estimate robot task progress suffer from confirmation bias: they hallucinate progress in failed executions, and naive prompting collapses into a binary success detector. D&amp;A (Describe &amp; Assess) splits progress estimation into an objective, task-grounded description of scene dynamics, followed by an assessment against explicit rubrics. This purely prompt-based approach gives calibrated zero-shot progress estimates, matches or beats post-trained reward models across tasks, embodiments, and benchmarks, and supports efficient downstream RL.</p>
+        <div class="chips">
+          <a class="chip" href="https://weirdlabuw.github.io/dna/" target="_blank" rel="noopener">project page ↗</a>
+          <a class="chip" href="https://arxiv.org/abs/2611.03622" target="_blank" rel="noopener">paper ↗</a>
+          <a class="chip" href="https://github.com/memmelma/dna" target="_blank" rel="noopener">code ↗</a>
+          <a class="chip" href="https://huggingface.co/datasets/memmelma/dnabench" target="_blank" rel="noopener">D&amp;A-Bench ↗</a>
+          <a class="chip" href="https://weirdlabuw.github.io/dna/demo/index.html" target="_blank" rel="noopener">demo ↗</a>
+        </div>
+      </article>
       <article class="entry">
         <div class="meta"><span class="pill live">2026</span><span>arXiv 2605.02881</span><span>Ai2 · University of Washington</span></div>
         <h3>MolmoAct2 <span class="org">· Action Reasoning Models for Real-world Deployment</span></h3>
@@ -274,6 +355,8 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
         <div class="links">
           <a class="btn" href="https://github.com/wadhwaangad" target="_blank" rel="noopener">github ↗</a>
           <a class="btn" href="https://www.linkedin.com/in/angadw/" target="_blank" rel="noopener">linkedin ↗</a>
+          <a class="btn" href="https://scholar.google.com/citations?hl=en&amp;user=5c6kf2MAAAAJ" target="_blank" rel="noopener">scholar ↗</a>
+          <a class="btn" href="https://openreview.net/profile?id=~Angad_Wadhwa1" target="_blank" rel="noopener">openreview ↗</a>
         </div>
       </div>
       <small>built with a canvas and some inverse kinematics.<br>no cubes were harmed.</small>
@@ -765,23 +848,33 @@ footer small{font:400 12px var(--f-mono);color:var(--muted)}
 })();
 </script>
 
-<button type="button" class="songpill" id="audio-toggle" aria-pressed="false">▶ play sound</button>
+<!-- always-visible play/pause control for the background sound -->
+<button type="button" class="songpill" id="audio-toggle" aria-pressed="false" aria-label="Play sound">
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  <span id="audio-label">▶ play sound</span>
+</button>
 <audio id="audio" src="audio.mp3" preload="auto" loop></audio>
 <script>
 (() => {
-  // plays if the browser allows autoplay; otherwise the button starts it
-  const a = document.getElementById('audio'), btn = document.getElementById('audio-toggle');
+  // tries to autoplay; if the browser blocks it, the button is always there to start it
+  const a = document.getElementById('audio');
+  const btn = document.getElementById('audio-toggle');
+  const label = document.getElementById('audio-label');
   a.volume = 0.5;
   const ui = () => {
     const on = !a.paused;
     btn.setAttribute('aria-pressed', on);
-    btn.textContent = on ? "❚❚ pause sound" : "▶ play sound";
+    btn.setAttribute('aria-label', on ? 'Pause sound' : 'Play sound');
+    label.textContent = on ? '❚❚ pause sound' : '▶ play sound';
   };
-  a.addEventListener('play', ui); a.addEventListener('pause', ui);
+  a.addEventListener('play', ui);
+  a.addEventListener('pause', ui);
+  a.addEventListener('error', () => { btn.disabled = true; label.textContent = 'sound unavailable'; });
   btn.addEventListener('click', () => {
-    a.paused ? a.play().catch(() => {}) : a.pause();
+    if (a.paused) a.play().catch(ui); else a.pause();
   });
-  a.play().catch(() => {});
+  ui();
+  a.play().catch(ui);
 })();
 </script>
 </body>
